@@ -26,10 +26,8 @@ def call_nemotron(prompt, system_prompt=""):
         "Content-Type": "application/json"
     }
 
-    # Adjust the endpoint and payload based on actual NVIDIA NIM API spec
-    # This is a template structure
     body = {
-        "model": "nemotron",
+        "model": "nvidia/nemotron-nano-12b-v2-vl",
         "messages": [
             {"role": "system", "content": system_prompt or "You are an AI wellness insight analyst."},
             {"role": "user", "content": prompt}
@@ -40,7 +38,7 @@ def call_nemotron(prompt, system_prompt=""):
 
     try:
         r = requests.post(
-            "https://api.nvidia.com/v1/nim/invoke",
+            "https://integrate.api.nvidia.com/v1/chat/completions",
             headers=headers,
             json=body,
             timeout=30
@@ -48,8 +46,8 @@ def call_nemotron(prompt, system_prompt=""):
         r.raise_for_status()
         response_data = r.json()
 
-        # Adjust based on actual API response structure
-        return response_data.get("output", response_data.get("choices", [{}])[0].get("message", {}).get("content", "No response"))
+        # Extract response from NVIDIA API format
+        return response_data.get("choices", [{}])[0].get("message", {}).get("content", "No response")
 
     except requests.exceptions.RequestException as e:
         return f"⚠️  API Error: {str(e)}"
@@ -57,35 +55,40 @@ def call_nemotron(prompt, system_prompt=""):
 
 def analyze_user(data):
     """
-    Analyze user wellness data and provide insights
+    Analyze user fitness data and provide insights
 
     Args:
-        data: Dictionary containing user wellness metrics
+        data: Dictionary containing user fitness metrics
 
     Returns:
         str: Analysis insights
     """
-    system_prompt = """You are a wellness insight analyst specializing in digital wellbeing
-    and healthy habits. Analyze user data objectively and identify key patterns,
-    particularly around screen time and health behaviors."""
+    system_prompt = """You are a fitness and strength training analyst specializing in
+    progressive overload, nutrition, and workout optimization. Analyze user data objectively
+    and identify patterns in their training, recovery, and nutrition."""
 
-    prompt = f"""Analyze this user's wellness data and provide 3-5 brief insights:
+    prompt = f"""Analyze this user's fitness data and provide 3-5 key insights:
 
 User Data:
-- Screen scrolling time: {data.get('scroll_minutes', 0)} minutes
-- Gym/Exercise completed: {data.get('gym_done', False)}
-- Current mood: {data.get('mood', 'unknown')}
+- Workout completed: {data.get('workout_done', False)}
+- Workout type: {data.get('workout_type', 'unknown')}
+- Current max lifts: {data.get('max_lifts', {})}
+- Recent workout weights: {data.get('recent_lifts', {})}
+- Protein intake (g): {data.get('protein_grams', 'unknown')}
+- Total calories: {data.get('calories', 'unknown')}
 - Sleep hours: {data.get('sleep_hours', 'unknown')}
-- Water intake (glasses): {data.get('water_intake', 'unknown')}
-- Screen time breaks taken: {data.get('screen_time_breaks', 0)}
+- Water intake (oz): {data.get('water_oz', 'unknown')}
+- Soreness level (1-10): {data.get('soreness', 'unknown')}
+- Energy level: {data.get('energy', 'unknown')}
 
 Focus on:
-1. Doomscrolling/excessive screen time patterns
-2. Connection between behaviors (sleep, exercise, mood)
-3. Key improvement areas
-4. What they're doing well
+1. Training consistency and progressive overload opportunities
+2. Recovery indicators (sleep, soreness, energy)
+3. Nutrition adequacy for fitness goals (protein, calories)
+4. Strength progression and readiness to increase weight
+5. What they're doing well
 
-Keep it concise and actionable."""
+Keep it concise, specific, and actionable."""
 
     return call_nemotron(prompt, system_prompt)
 

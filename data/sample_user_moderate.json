@@ -1,10 +1,24 @@
 {
-  "user_id": "demo_user_003",
+  "user_id": "lifter_003",
   "date": "2025-01-17",
-  "scroll_minutes": 45,
-  "gym_done": true,
-  "mood": "neutral",
+  "workout_done": true,
+  "workout_type": "leg_day",
+  "max_lifts": {
+    "bench_press": 205,
+    "squat": 275,
+    "deadlift": 335,
+    "overhead_press": 125
+  },
+  "recent_lifts": {
+    "squat": 265,
+    "leg_press": 450,
+    "romanian_deadlift": 225
+  },
+  "protein_grams": 140,
+  "calories": 2400,
   "sleep_hours": 7,
-  "water_intake": 6,
-  "screen_time_breaks": 3
+  "water_oz": 75,
+  "soreness": 5,
+  "energy": "moderate",
+  "body_weight": 180
 }

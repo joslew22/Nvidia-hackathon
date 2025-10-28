@@ -1,10 +1,24 @@
 {
-  "user_id": "demo_user_002",
+  "user_id": "lifter_002",
   "date": "2025-01-16",
-  "scroll_minutes": 20,
-  "gym_done": true,
-  "mood": "energized",
+  "workout_done": true,
+  "workout_type": "upper_body",
+  "max_lifts": {
+    "bench_press": 225,
+    "squat": 315,
+    "deadlift": 405,
+    "overhead_press": 145
+  },
+  "recent_lifts": {
+    "bench_press": 215,
+    "overhead_press": 135,
+    "incline_press": 185
+  },
+  "protein_grams": 180,
+  "calories": 2800,
   "sleep_hours": 8,
-  "water_intake": 8,
-  "screen_time_breaks": 5
+  "water_oz": 100,
+  "soreness": 3,
+  "energy": "high",
+  "body_weight": 185
 }

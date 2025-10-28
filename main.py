@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """
-FocusFlow - AI Wellness Agent System
-Multi-agent system using NVIDIA NIM + Nemotron to reduce doomscrolling
-and build healthy habits through Reason → Act → Observe loops
+FocusFlow - AI Fitness Coaching System
+Multi-agent system using NVIDIA NIM + Nemotron to optimize workouts,
+track progressive overload, and maximize gains through Reason → Act → Observe loops
 """
 import os
 import sys
@@ -33,52 +33,93 @@ def load_user_data(filepath):
 
 
 def display_report(data, insight, plan, coaching):
-    """Display the FocusFlow report in a formatted way"""
-    print("\n" + "="*60)
-    print("  🎯 FOCUSFLOW WELLNESS REPORT")
-    print("="*60)
+    """Display the FocusFlow fitness report"""
+    print("\n" + "="*70)
+    print("  💪 FOCUSFLOW FITNESS COACHING REPORT")
+    print("="*70)
 
-    print("\n📊 USER DATA")
+    print("\n📊 CURRENT STATS")
     print(f"   Date: {data.get('date', 'Unknown')}")
-    print(f"   Scroll Time: {data.get('scroll_minutes', 0)} minutes")
-    print(f"   Exercise: {'✅ Done' if data.get('gym_done') else '❌ Skipped'}")
-    print(f"   Mood: {data.get('mood', 'unknown').capitalize()}")
-    print(f"   Sleep: {data.get('sleep_hours', '?')} hours")
-    print(f"   Water: {data.get('water_intake', '?')} glasses")
-    print(f"   Breaks: {data.get('screen_time_breaks', 0)} times")
+    print(f"   Body Weight: {data.get('body_weight', '?')} lbs")
+    print(f"   Workout: {'✅ ' + data.get('workout_type', 'completed') if data.get('workout_done') else '❌ Rest Day'}")
 
-    print("\n" + "-"*60)
-    print("🧠 INSIGHTS (Reason)")
-    print("-"*60)
+    # Display max lifts
+    max_lifts = data.get('max_lifts', {})
+    if max_lifts:
+        print(f"\n   💯 MAX LIFTS:")
+        for lift, weight in max_lifts.items():
+            print(f"      {lift.replace('_', ' ').title()}: {weight} lbs")
+
+    # Display recent workout
+    recent_lifts = data.get('recent_lifts', {})
+    if recent_lifts:
+        print(f"\n   🏋️  TODAY'S LIFTS:")
+        for lift, weight in recent_lifts.items():
+            print(f"      {lift.replace('_', ' ').title()}: {weight} lbs")
+
+    print(f"\n   🍗 Nutrition:")
+    print(f"      Protein: {data.get('protein_grams', '?')}g")
+    print(f"      Calories: {data.get('calories', '?')}")
+    print(f"      Water: {data.get('water_oz', '?')} oz")
+
+    print(f"\n   😴 Recovery:")
+    print(f"      Sleep: {data.get('sleep_hours', '?')} hours")
+    print(f"      Soreness: {data.get('soreness', '?')}/10")
+    print(f"      Energy: {data.get('energy', 'unknown').title()}")
+
+    print("\n" + "-"*70)
+    print("🧠 PERFORMANCE ANALYSIS (Reason)")
+    print("-"*70)
     print(insight)
 
-    print("\n" + "-"*60)
-    print("📋 ACTION PLAN (Act)")
-    print("-"*60)
+    print("\n" + "-"*70)
+    print("📋 TOMORROW'S WORKOUT & MEAL PLAN (Act)")
+    print("-"*70)
     print(plan)
 
-    print("\n" + "-"*60)
-    print("💪 COACHING (Observe & Motivate)")
-    print("-"*60)
+    print("\n" + "-"*70)
+    print("🔥 COACH'S MOTIVATION (Observe & Inspire)")
+    print("-"*70)
     print(coaching)
 
-    print("\n" + "="*60)
+    print("\n" + "="*70)
     print()
 
 
 def interactive_mode():
     """Run FocusFlow in interactive CLI mode"""
-    print("\n🎯 FocusFlow Interactive Mode")
-    print("="*60)
+    print("\n💪 FocusFlow Fitness Coach - Interactive Mode")
+    print("="*70)
 
     # Collect user input
     try:
-        scroll_mins = int(input("📱 How many minutes did you scroll today? "))
-        gym_done = input("💪 Did you exercise today? (y/n) ").lower().startswith('y')
-        mood = input("😊 How do you feel? (energized/tired/neutral/stressed) ").lower()
-        sleep_hours = float(input("😴 How many hours did you sleep? "))
-        water_intake = int(input("💧 How many glasses of water? "))
-        breaks = int(input("⏸️  How many screen breaks did you take? "))
+        workout_done = input("🏋️  Did you workout today? (y/n) ").lower().startswith('y')
+        workout_type = input("   What type? (upper/lower/full/cardio/rest): ").lower() if workout_done else "rest"
+
+        print("\n📊 Enter your max lifts (press Enter to skip):")
+        bench = input("   Bench Press max (lbs): ")
+        squat = input("   Squat max (lbs): ")
+        deadlift = input("   Deadlift max (lbs): ")
+        ohp = input("   Overhead Press max (lbs): ")
+
+        max_lifts = {}
+        if bench: max_lifts["bench_press"] = int(bench)
+        if squat: max_lifts["squat"] = int(squat)
+        if deadlift: max_lifts["deadlift"] = int(deadlift)
+        if ohp: max_lifts["overhead_press"] = int(ohp)
+
+        print("\n🍗 Nutrition:")
+        protein = int(input("   Protein consumed today (grams): "))
+        calories = int(input("   Total calories: "))
+        water_oz = int(input("   Water intake (oz): "))
+
+        print("\n😴 Recovery:")
+        sleep_hours = float(input("   Sleep last night (hours): "))
+        soreness = int(input("   Soreness level (1-10): "))
+        energy = input("   Energy level (low/moderate/high): ").lower()
+
+        body_weight = int(input("\n⚖️  Current body weight (lbs): "))
+
     except (ValueError, KeyboardInterrupt):
         print("\n❌ Invalid input or cancelled.")
         return
@@ -87,16 +128,21 @@ def interactive_mode():
     user_data = {
         "user_id": "interactive_user",
         "date": "today",
-        "scroll_minutes": scroll_mins,
-        "gym_done": gym_done,
-        "mood": mood,
+        "workout_done": workout_done,
+        "workout_type": workout_type,
+        "max_lifts": max_lifts,
+        "recent_lifts": {},
+        "protein_grams": protein,
+        "calories": calories,
+        "water_oz": water_oz,
         "sleep_hours": sleep_hours,
-        "water_intake": water_intake,
-        "screen_time_breaks": breaks
+        "soreness": soreness,
+        "energy": energy,
+        "body_weight": body_weight
     }
 
     # Run agent pipeline
-    print("\n🔄 Running multi-agent analysis...")
+    print("\n🔄 Running AI coaching analysis...")
     run_pipeline(user_data)
 
 

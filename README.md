@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # 🎯 FocusFlow
 
 **AI Wellness Agent System** - Reduce doomscrolling and build healthy habits with multi-agent AI powered by NVIDIA NIM + Nemotron
@@ -23,15 +22,16 @@ Each agent makes independent LLM calls to NVIDIA NIM with specialized system pro
 
 ### Prerequisites
 
-- Python 3.10+ (you have 3.13.7 ✅)
+- Python 3.10+
 - NVIDIA NIM API key (get from hackathon organizers)
 - VS Code (recommended)
 
 ### Installation
 
 ```bash
-# 1. Navigate to project directory
-cd "/Users/danieladewale/Desktop/Focus Flow"
+# 1. Clone repository
+git clone https://github.com/joslew22/Nvidia-hackathon.git
+cd Nvidia-hackathon
 
 # 2. Create virtual environment (recommended)
 python3 -m venv venv
@@ -47,7 +47,7 @@ cp .env.example .env
 
 ### Configuration
 
-Edit [.env](.env) and add your API key:
+Edit `.env` and add your API key:
 
 ```bash
 NIM_API_KEY=your_actual_api_key_here
@@ -61,7 +61,7 @@ NIM_API_KEY=your_actual_api_key_here
 python main.py
 ```
 
-Uses [data/sample_user.json](data/sample_user.json) by default.
+Uses `data/sample_user.json` by default.
 
 ### Run with Custom Data File
 
@@ -246,7 +246,7 @@ curl -X POST https://api.nvidia.com/v1/nim/invoke \
 ⚠️  NIM_API_KEY not found
 ```
 
-**Fix**: Copy [.env.example](.env.example) to `.env` and add your key.
+**Fix**: Copy `.env.example` to `.env` and add your key.
 
 ### Import Errors
 
@@ -287,6 +287,3 @@ Built for [Hackathon Name] using:
 ---
 
 **Ready to build?** Start with `python main.py --interactive` and see the magic happen! 🚀
-=======
-# Nvidia-hackathon
->>>>>>> 0ca994b2b17ee99f1f855f35853ebe157bef6ba4

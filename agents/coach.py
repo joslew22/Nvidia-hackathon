@@ -26,7 +26,7 @@ def call_nemotron(prompt, system_prompt=""):
     }
 
     body = {
-        "model": "nemotron",
+        "model": "nvidia/nemotron-nano-12b-v2-vl",
         "messages": [
             {"role": "system", "content": system_prompt or "You are a supportive wellness coach."},
             {"role": "user", "content": prompt}
@@ -37,14 +37,14 @@ def call_nemotron(prompt, system_prompt=""):
 
     try:
         r = requests.post(
-            "https://api.nvidia.com/v1/nim/invoke",
+            "https://integrate.api.nvidia.com/v1/chat/completions",
             headers=headers,
             json=body,
             timeout=30
         )
         r.raise_for_status()
         response_data = r.json()
-        return response_data.get("output", response_data.get("choices", [{}])[0].get("message", {}).get("content", "No response"))
+        return response_data.get("choices", [{}])[0].get("message", {}).get("content", "No response")
 
     except requests.exceptions.RequestException as e:
         return f"⚠️  API Error: {str(e)}"
@@ -52,33 +52,38 @@ def call_nemotron(prompt, system_prompt=""):
 
 def motivate_user(insights, plan=""):
     """
-    Provide positive, realistic coaching based on insights and plan
+    Provide motivational coaching and lifting progression advice
 
     Args:
         insights: Analysis from the Insight Agent
         plan: Suggested plan from the Planner Agent (optional)
 
     Returns:
-        str: Motivational coaching message
+        str: Motivational coaching message with progression guidance
     """
-    system_prompt = """You are an empathetic wellness coach focused on positive reinforcement
-    and realistic, achievable actions. You help users overcome doomscrolling and build
-    sustainable healthy habits. Be encouraging but honest."""
+    system_prompt = """You are a hardcore strength coach and motivator who helps lifters
+    push past plateaus and reach new PRs. You understand progressive overload, periodization,
+    and the mental game of lifting. You're supportive but push people to their potential.
+    Be energetic, confident, and inspiring."""
 
-    prompt = f"""Based on these insights and planned actions, provide motivational coaching:
+    prompt = f"""Based on these insights and workout plan, provide powerful motivation and coaching:
 
 Insights:
 {insights}
 
-Planned Actions:
+Tomorrow's Plan:
 {plan if plan else "None yet"}
 
 Provide:
-1. Positive reinforcement for what they're doing well
-2. One realistic, specific action they can take TODAY
-3. A brief encouraging message (2-3 sentences max)
+1. HYPE THEM UP - Celebrate wins and acknowledge their hard work
+2. PR POTENTIAL - If they're ready for a weight increase, explain the science and get them excited
+3. MINDSET - One powerful mental strategy for crushing tomorrow's workout
+4. ACCOUNTABILITY - A specific challenge or goal to hit
 
-Keep your tone warm, supportive, and action-oriented."""
+Be intense, motivating, and specific. Use lifting terminology. Make them want to destroy that workout.
+If their recovery isn't optimal (low sleep, high soreness), advise scaling back intelligently.
+
+End with a powerful one-liner that'll fire them up."""
 
     return call_nemotron(prompt, system_prompt)
 
