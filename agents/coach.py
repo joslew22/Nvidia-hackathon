@@ -3,11 +3,15 @@ Coach Agent - Provides motivational feedback and actionable advice
 """
 import os
 import requests
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv()
 
 
 def call_nemotron(prompt, system_prompt=""):
     """
-    Call NVIDIA NIM API with Nemotron model
+    Call NVIDIA NIM API with recommended motivational coaching model
 
     Args:
         prompt: The user prompt
@@ -20,34 +24,54 @@ def call_nemotron(prompt, system_prompt=""):
     if not api_key:
         return "⚠️  NIM_API_KEY not found. Please set it in your .env file."
 
+    # Get model configuration from environment
+    model = os.getenv("COACH_MODEL", "nvidia/nemotron-4-340b-instruct")
+    fallback_model = os.getenv("FALLBACK_MODEL", "nvidia/llama-3.1-nemotron-70b-instruct")
+    endpoint = os.getenv("NIM_ENDPOINT", "https://integrate.api.nvidia.com/v1")
+
     headers = {
         "Authorization": f"Bearer {api_key}",
         "Content-Type": "application/json"
     }
 
     body = {
-        "model": "nvidia/nemotron-nano-12b-v2-vl",
+        "model": model,
         "messages": [
-            {"role": "system", "content": system_prompt or "You are a supportive wellness coach."},
+            {"role": "system", "content": system_prompt or "You are an elite strength coach and motivator who inspires lifters to reach their potential."},
             {"role": "user", "content": prompt}
         ],
         "temperature": 0.8,
-        "max_tokens": 400
+        "max_tokens": 600,
+        "top_p": 0.9
     }
 
     try:
+        # Try primary model first
         r = requests.post(
-            "https://integrate.api.nvidia.com/v1/chat/completions",
+            f"{endpoint}/chat/completions",
             headers=headers,
             json=body,
-            timeout=30
+            timeout=45
         )
         r.raise_for_status()
         response_data = r.json()
         return response_data.get("choices", [{}])[0].get("message", {}).get("content", "No response")
 
     except requests.exceptions.RequestException as e:
-        return f"⚠️  API Error: {str(e)}"
+        # Try fallback model if primary fails
+        try:
+            body["model"] = fallback_model
+            r = requests.post(
+                f"{endpoint}/chat/completions",
+                headers=headers,
+                json=body,
+                timeout=30
+            )
+            r.raise_for_status()
+            response_data = r.json()
+            return response_data.get("choices", [{}])[0].get("message", {}).get("content", "No response")
+        except:
+            return f"⚠️  API Error: {str(e)}"
 
 
 def motivate_user(insights, plan=""):
