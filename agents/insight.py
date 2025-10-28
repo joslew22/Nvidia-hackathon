@@ -67,6 +67,15 @@ def analyze_user(data):
     progressive overload, nutrition, and workout optimization. Analyze user data objectively
     and identify patterns in their training, recovery, and nutrition."""
 
+    # Include photo analysis if available
+    photo_section = ""
+    if data.get('photo_analysis'):
+        photo_section = f"""
+
+PHYSIQUE ANALYSIS FROM PHOTO:
+{data.get('photo_analysis')}
+"""
+
     prompt = f"""Analyze this user's fitness data and provide 3-5 key insights:
 
 User Data:
@@ -80,13 +89,15 @@ User Data:
 - Water intake (oz): {data.get('water_oz', 'unknown')}
 - Soreness level (1-10): {data.get('soreness', 'unknown')}
 - Energy level: {data.get('energy', 'unknown')}
+{photo_section}
 
 Focus on:
 1. Training consistency and progressive overload opportunities
 2. Recovery indicators (sleep, soreness, energy)
 3. Nutrition adequacy for fitness goals (protein, calories)
 4. Strength progression and readiness to increase weight
-5. What they're doing well
+5. If photo analysis is provided, incorporate those physique insights into recommendations
+6. What they're doing well
 
 Keep it concise, specific, and actionable."""
 

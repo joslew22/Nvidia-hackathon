@@ -91,9 +91,29 @@ def interactive_mode():
     print("\n💪 FocusFlow Fitness Coach - Interactive Mode")
     print("="*70)
 
+    # Ask about body photo analysis
+    use_photo = input("\n📸 Do you have a body photo for AI analysis? (y/n) ").lower().startswith('y')
+    photo_analysis = None
+
+    if use_photo:
+        photo_path = input("   Enter path to your photo: ").strip()
+        if os.path.exists(photo_path):
+            print("\n🔄 Analyzing your physique with AI vision...")
+            from agents.vision_analyzer import analyze_physique
+            fitness_goal = input("   What's your primary goal? (build muscle/lose fat/get lean): ").lower()
+            photo_analysis = analyze_physique(image_path=photo_path, user_goals=fitness_goal)
+            print("\n" + "="*70)
+            print("📸 PHYSIQUE ANALYSIS")
+            print("="*70)
+            print(photo_analysis)
+            print("\n" + "="*70)
+        else:
+            print(f"   ⚠️  Photo not found at: {photo_path}")
+            print("   Continuing without photo analysis...\n")
+
     # Collect user input
     try:
-        workout_done = input("🏋️  Did you workout today? (y/n) ").lower().startswith('y')
+        workout_done = input("\n🏋️  Did you workout today? (y/n) ").lower().startswith('y')
         workout_type = input("   What type? (upper/lower/full/cardio/rest): ").lower() if workout_done else "rest"
 
         print("\n📊 Enter your max lifts (press Enter to skip):")
@@ -138,7 +158,8 @@ def interactive_mode():
         "sleep_hours": sleep_hours,
         "soreness": soreness,
         "energy": energy,
-        "body_weight": body_weight
+        "body_weight": body_weight,
+        "photo_analysis": photo_analysis  # Add photo analysis to user data
     }
 
     # Run agent pipeline
