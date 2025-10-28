@@ -1,0 +1,12 @@
+# FocusFlow Dependencies
+# Python 3.10+
+
+# Core dependencies
+requests>=2.31.0
+python-dotenv>=1.0.0
+
+# Optional: For future enhancements
+# flask>=3.0.0              # If adding web UI
+# streamlit>=1.29.0         # Alternative web UI framework
+# openai>=1.0.0             # If using OpenAI-compatible endpoints
+# pydantic>=2.5.0           # For data validation

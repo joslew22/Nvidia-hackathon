@@ -1,0 +1,10 @@
+{
+  "user_id": "demo_user_002",
+  "date": "2025-01-16",
+  "scroll_minutes": 20,
+  "gym_done": true,
+  "mood": "energized",
+  "sleep_hours": 8,
+  "water_intake": 8,
+  "screen_time_breaks": 5
+}
