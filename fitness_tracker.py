@@ -88,19 +88,243 @@ def main():
     st.markdown("**Personalized AI Fitness Coaching powered by NVIDIA NIM + Nemotron**")
 
     # Navigation tabs
-    tab1, tab2, tab3, tab4 = st.tabs(["👤 Profile", "📋 Workout Plan", "📊 Progress", "🔔 Notifications"])
+    tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs(["👤 Profile", "📸 Photo Analysis", "📋 Workout Plan", "🔄 ReAct Loop", "📊 Progress", "🔔 Notifications"])
 
     with tab1:
         user_profile_page()
 
     with tab2:
-        workout_plan_page()
+        photo_analysis_page()
 
     with tab3:
-        progress_tracking_page()
+        workout_plan_page()
 
     with tab4:
+        react_loop_page()
+
+    with tab5:
+        progress_tracking_page()
+
+    with tab6:
         notifications_page()
+
+def photo_analysis_page():
+    """Body photo analysis using Vision AI"""
+    st.header("📸 AI Physique Analysis")
+
+    st.markdown("""
+    Upload a body photo and let our AI vision model analyze your physique to create
+    a personalized workout plan based on your current development.
+    """)
+
+    # Photo upload
+    uploaded_file = st.file_uploader("Upload Body Photo", type=['jpg', 'jpeg', 'png'])
+
+    col1, col2 = st.columns([1, 1])
+
+    with col1:
+        if uploaded_file is not None:
+            st.image(uploaded_file, caption="Your Photo", use_column_width=True)
+
+            # Fitness goal selection
+            goal = st.selectbox(
+                "Primary Fitness Goal",
+                ["Build Muscle", "Lose Fat", "Get Lean/Toned", "General Fitness"]
+            )
+
+            if st.button("🔍 Analyze Physique", type="primary", use_container_width=True):
+                with st.spinner("AI analyzing your physique... This may take 10-15 seconds"):
+                    import base64
+                    from agents.vision_analyzer import analyze_physique
+
+                    # Convert uploaded file to base64
+                    bytes_data = uploaded_file.getvalue()
+                    base64_image = base64.b64encode(bytes_data).decode()
+
+                    # Analyze
+                    analysis = analyze_physique(image_base64=base64_image, user_goals=goal.lower())
+
+                    # Store in session state
+                    st.session_state['physique_analysis'] = analysis
+                    st.session_state['analysis_goal'] = goal
+                    st.success("✅ Analysis complete!")
+
+    with col2:
+        if 'physique_analysis' in st.session_state:
+            st.subheader("🧠 AI Analysis Results")
+            st.markdown("""
+            <div class="workout-card">
+                <h4>Physique Assessment</h4>
+            </div>
+            """, unsafe_allow_html=True)
+
+            st.write(st.session_state['physique_analysis'])
+
+            # Option to create workout plan based on analysis
+            if st.button("💪 Create Custom Workout Plan", type="primary"):
+                with st.spinner("Creating personalized workout plan..."):
+                    from agents.vision_analyzer import create_visual_workout_plan
+
+                    user_data = {
+                        'goal': st.session_state['analysis_goal'].lower(),
+                        'days_per_week': 4,
+                        'experience': 'intermediate',
+                        'body_weight': st.session_state.fitness_profile.get('weight', 180) * 2.2  # kg to lbs
+                    }
+
+                    workout_plan = create_visual_workout_plan(
+                        st.session_state['physique_analysis'],
+                        user_data
+                    )
+
+                    st.session_state['vision_workout_plan'] = workout_plan
+                    st.success("✅ Custom plan created!")
+
+            if 'vision_workout_plan' in st.session_state:
+                st.markdown("""
+                <div class="workout-card">
+                    <h4>Your Custom Workout Plan</h4>
+                </div>
+                """, unsafe_allow_html=True)
+                st.write(st.session_state['vision_workout_plan'])
+        else:
+            st.info("👆 Upload a photo to get started with AI analysis")
+
+def react_loop_page():
+    """Multi-agent ReAct loop with feedback demonstration"""
+    st.header("🔄 Multi-Agent ReAct Loop")
+
+    st.markdown("""
+    Watch how our AI agents collaborate using the **ReAct pattern** (Reason → Act → Observe).
+    The agents will:
+    1. **Reason** - Analyze your fitness data
+    2. **Act** - Create a workout plan
+    3. **Observe** - Provide coaching feedback
+    4. **Re-evaluate** - Adjust based on simulated feedback
+    """)
+
+    # Input current stats
+    col1, col2 = st.columns(2)
+
+    with col1:
+        st.subheader("Current Stats")
+        sleep_hours = st.slider("Sleep last night (hours)", 4.0, 10.0, 7.0, 0.5)
+        soreness = st.slider("Soreness level (1-10)", 1, 10, 5)
+        energy = st.selectbox("Energy level", ["low", "moderate", "high"])
+
+    with col2:
+        st.subheader("Training Info")
+        bench_max = st.number_input("Bench Press Max (lbs)", 100, 500, 185, 5)
+        squat_max = st.number_input("Squat Max (lbs)", 100, 600, 225, 5)
+        deadlift_max = st.number_input("Deadlift Max (lbs)", 100, 700, 275, 5)
+
+    if st.button("🚀 Run ReAct Loop", type="primary", use_container_width=True):
+        # Create user data
+        user_data = {
+            "user_id": "streamlit_user",
+            "date": str(datetime.date.today()),
+            "workout_done": True,
+            "workout_type": "upper_body",
+            "max_lifts": {
+                "bench_press": bench_max,
+                "squat": squat_max,
+                "deadlift": deadlift_max
+            },
+            "recent_lifts": {},
+            "protein_grams": 140,
+            "calories": 2400,
+            "sleep_hours": sleep_hours,
+            "water_oz": 70,
+            "soreness": soreness,
+            "energy": energy,
+            "body_weight": 175
+        }
+
+        # Progress indicators
+        progress_text = st.empty()
+        progress_bar = st.progress(0)
+
+        # Iteration 1
+        progress_text.text("🧠 Iteration 1: Reasoning...")
+        progress_bar.progress(20)
+
+        with st.spinner("Insight Agent analyzing data..."):
+            insight = analyze_user(user_data)
+
+        with st.expander("🧠 Step 1: REASON - Insight Analysis", expanded=True):
+            st.markdown(f"**Insight Agent says:**\n\n{insight}")
+
+        progress_text.text("📋 Iteration 1: Planning...")
+        progress_bar.progress(40)
+
+        with st.spinner("Planner Agent creating workout plan..."):
+            plan = plan_next_day(insight, user_data)
+
+        with st.expander("📋 Step 2: ACT - Workout Plan", expanded=True):
+            st.markdown(f"**Planner Agent says:**\n\n{plan}")
+
+        progress_text.text("💪 Iteration 1: Coaching...")
+        progress_bar.progress(60)
+
+        with st.spinner("Coach Agent providing motivation..."):
+            coaching = motivate_user(insight, plan)
+
+        with st.expander("💪 Step 3: OBSERVE - Coaching Feedback", expanded=True):
+            st.markdown(f"**Coach Agent says:**\n\n{coaching}")
+
+        # Simulate user feedback
+        progress_text.text("💬 Simulating user feedback...")
+        progress_bar.progress(80)
+
+        feedback_scenarios = {
+            "too_hard": "This looks really intense. I'm not sure I can handle that volume with my current soreness.",
+            "just_right": "This looks challenging but doable!",
+            "too_easy": "I feel great and recovered. Can we add more volume?"
+        }
+
+        if soreness >= 7:
+            feedback = feedback_scenarios["too_hard"]
+            sentiment = "negative"
+        elif soreness <= 3:
+            feedback = feedback_scenarios["too_easy"]
+            sentiment = "positive"
+        else:
+            feedback = feedback_scenarios["just_right"]
+            sentiment = "neutral"
+
+        st.markdown(f"""
+        <div class="workout-card">
+            <h4>💬 Step 4: USER FEEDBACK (Simulated)</h4>
+            <p><strong>User says:</strong> "{feedback}"</p>
+            <p><strong>Sentiment:</strong> {sentiment.title()}</p>
+        </div>
+        """, unsafe_allow_html=True)
+
+        progress_text.text("✅ ReAct Loop Complete!")
+        progress_bar.progress(100)
+
+        # Store results
+        st.session_state['react_results'] = {
+            'insight': insight,
+            'plan': plan,
+            'coaching': coaching,
+            'feedback': feedback
+        }
+
+        st.success("🎉 Multi-agent collaboration complete! The agents have analyzed, planned, and coached based on your data.")
+
+        # Show summary
+        st.subheader("📊 ReAct Loop Summary")
+        col1, col2, col3 = st.columns(3)
+
+        with col1:
+            st.metric("Iterations", "1", help="Number of reasoning cycles")
+
+        with col2:
+            st.metric("Agents Used", "3", help="Insight, Planner, Coach")
+
+        with col3:
+            st.metric("Feedback Cycles", "1", help="User feedback iterations")
 
 def user_profile_page():
     """User profile and fitness goals setup"""
@@ -360,60 +584,67 @@ def progress_tracking_page():
         """, unsafe_allow_html=True)
 
 def notifications_page():
-    """Real-time notifications and reminders"""
+    """Real-time notifications and reminders using NotificationManager"""
     st.header("🔔 Smart Notifications")
 
-    current_time = datetime.datetime.now()
-    profile = st.session_state.fitness_profile
+    st.markdown("""
+    Get AI-powered notifications for workouts, meals, PR attempts, and recovery alerts.
+    """)
 
-    # Generate real-time notifications
-    notifications = []
+    # Generate notifications button
+    if st.button("🔄 Generate Smart Notifications", type="primary", use_container_width=True):
+        from notification_system import NotificationManager
 
-    # Gym time reminder
-    preferred_time = datetime.datetime.strptime(profile['preferred_time'], "%H:%M:%S").time()
-    current_day = current_time.strftime("%A")
+        # Create user data from profile
+        user_data = {
+            'body_weight': st.session_state.fitness_profile.get('weight', 70) * 2.2,  # kg to lbs
+            'sleep_hours': 7.5,  # Default values
+            'soreness': 5,
+            'energy': 'moderate',
+            'max_lifts': {
+                'bench_press': 185,
+                'squat': 225,
+                'deadlift': 275
+            }
+        }
 
-    if current_day in profile['gym_schedule']:
-        time_diff = datetime.datetime.combine(datetime.date.today(), preferred_time) - current_time
-        if 0 <= time_diff.seconds <= 3600:  # Within 1 hour
-            notifications.append({
-                "type": "gym",
-                "message": f"🏋️ Gym time in {time_diff.seconds//60} minutes!",
-                "action": "Get your gym gear ready and head out!"
-            })
+        # Generate notifications
+        notif_manager = NotificationManager(user_data)
+        notif_manager.run_notification_check()
 
-    # Meal reminders
-    for i, meal_time in enumerate(profile['meal_times']):
-        meal_names = ["Breakfast", "Lunch", "Dinner"]
-        meal_datetime = datetime.datetime.strptime(meal_time, "%H:%M:%S").time()
-        meal_diff = datetime.datetime.combine(datetime.date.today(), meal_datetime) - current_time
+        # Store in session state
+        st.session_state['active_notifications'] = notif_manager.notifications
 
-        if 0 <= meal_diff.seconds <= 1800:  # Within 30 minutes
-            notifications.append({
-                "type": "meal",
-                "message": f"🍽️ {meal_names[i]} time in {meal_diff.seconds//60} minutes!",
-                "action": "Time for a nutritious meal to fuel your fitness goals!"
-            })
+    # Display active notifications
+    if 'active_notifications' in st.session_state and st.session_state['active_notifications']:
+        st.subheader("📬 Active Notifications")
 
-    # Motivational notifications
-    if current_time.hour == 9:  # Morning motivation
-        notifications.append({
-            "type": "motivation",
-            "message": "🌅 Good morning! Ready to crush your fitness goals today?",
-            "action": "Start with a healthy breakfast and plan your workout!"
-        })
+        for notif in st.session_state['active_notifications']:
+            priority_colors = {
+                'high': '#ff9a9e',
+                'medium': '#a8edea',
+                'low': '#fed6e3'
+            }
 
-    # Display notifications
-    if notifications:
-        for notif in notifications:
+            color = priority_colors.get(notif['priority'], '#e0e0e0')
+
             st.markdown(f"""
-            <div class="notification-alert">
-                <h4>{notif["message"]}</h4>
-                <p><strong>Action:</strong> {notif["action"]}</p>
+            <div style="
+                background: linear-gradient(135deg, {color} 0%, #fecfef 100%);
+                padding: 1.5rem;
+                border-radius: 10px;
+                border-left: 5px solid #f44336;
+                margin: 1rem 0;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            ">
+                <h4 style="margin: 0; color: #333;">{notif['title']}</h4>
+                <p style="margin: 0.5rem 0; color: #555;">{notif['message']}</p>
+                <p style="margin: 0; font-size: 0.9rem; color: #666;"><strong>Priority:</strong> {notif['priority'].upper()}</p>
+                {f'<p style="margin: 0; font-size: 0.9rem; color: #666;"><strong>Action:</strong> {notif["action"].replace("_", " ").title()}</p>' if notif['action'] != 'none' else ''}
             </div>
             """, unsafe_allow_html=True)
     else:
-        st.info("No active notifications. You're on track! 💪")
+        st.info("👆 Click 'Generate Smart Notifications' to see personalized alerts")
 
     # Manual notification settings
     st.subheader("⚙️ Notification Preferences")
