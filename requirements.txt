@@ -5,8 +5,13 @@
 requests>=2.31.0
 python-dotenv>=1.0.0
 
+# Streamlit Web UI
+streamlit>=1.29.0
+matplotlib>=3.7.0
+plotly>=5.17.0
+pandas>=2.1.0
+
 # Optional: For future enhancements
 # flask>=3.0.0              # If adding web UI
-# streamlit>=1.29.0         # Alternative web UI framework
 # openai>=1.0.0             # If using OpenAI-compatible endpoints
 # pydantic>=2.5.0           # For data validation
