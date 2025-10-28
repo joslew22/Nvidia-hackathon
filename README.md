@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # 🎯 FocusFlow
 
 **AI Wellness Agent System** - Reduce doomscrolling and build healthy habits with multi-agent AI powered by NVIDIA NIM + Nemotron
@@ -286,3 +287,6 @@ Built for [Hackathon Name] using:
 ---
 
 **Ready to build?** Start with `python main.py --interactive` and see the magic happen! 🚀
+=======
+# Nvidia-hackathon
+>>>>>>> 0ca994b2b17ee99f1f855f35853ebe157bef6ba4
