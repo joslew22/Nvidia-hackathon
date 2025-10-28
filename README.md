@@ -1,22 +1,23 @@
 # 🎯 FocusFlow
 
-**AI Wellness Agent System** - Reduce doomscrolling and build healthy habits with multi-agent AI powered by NVIDIA NIM + Nemotron
+**AI Fitness Coaching System** - Build muscle, track progressive overload, and maximize gains with multi-agent AI powered by NVIDIA NIM + Nemotron Vision-Language Model
 
 ## Overview
 
-FocusFlow is a demonstration of multi-agent AI reasoning using the **ReAct pattern** (Reason → Act → Observe). Three specialized Nemotron-powered agents work together to:
+FocusFlow is a demonstration of multi-agent AI reasoning using the **ReAct pattern** (Reason → Act → Observe). Four specialized Nemotron-powered agents work together to:
 
-1. **Insight Agent** - Analyzes user wellness data to identify patterns
-2. **Planner Agent** - Creates actionable next-day plans
-3. **Coach Agent** - Provides motivational feedback and realistic advice
+1. **Vision Analyzer Agent** - Analyzes body photos to assess physique, muscle development, and create personalized plans
+2. **Insight Agent** - Analyzes workout performance, nutrition, and recovery metrics
+3. **Planner Agent** - Creates progressive workout plans with specific weights, sets, and reps + meal prep strategies
+4. **Coach Agent** - Provides hardcore motivation, PR progression advice, and accountability
 
 ## Architecture
 
 ```
-User Data → Insight Agent (Reason) → Planner Agent (Act) → Coach Agent (Observe) → User
+Body Photo → Vision Agent → Insight Agent (Reason) → Planner Agent (Act) → Coach Agent (Observe) → User
 ```
 
-Each agent makes independent LLM calls to NVIDIA NIM with specialized system prompts, demonstrating how multiple AI agents can collaborate on a complex problem.
+Each agent makes independent LLM calls to NVIDIA NIM with specialized system prompts, demonstrating how multiple AI agents can collaborate on a complex fitness coaching problem. The Vision-Language model enables analysis of body photos for truly personalized training programs.
 
 ## Quick Start
 
@@ -91,22 +92,53 @@ python agents/coach.py
 python agents/planner.py
 ```
 
+### 📸 Vision Analysis Feature
+
+**NEW!** Upload body photos for AI-powered physique analysis and personalized workout plans:
+
+```bash
+# Quick test with your photo
+python3 test_vision.py path/to/your/photo.jpg
+
+# Or use in interactive mode
+python3 main.py --interactive
+# When prompted, answer 'y' to photo analysis
+```
+
+**What the Vision Agent analyzes:**
+- Body composition (estimated body fat %, muscle mass)
+- Muscle development (which groups are strong/weak)
+- Symmetry and balance
+- Posture assessment
+- Training level classification
+- Priority areas for your goals
+
+**Use cases:**
+- **Initial Assessment**: Upload a photo when starting to get a baseline analysis
+- **Progress Tracking**: Compare before/after photos to see gains
+- **Form Check**: Upload exercise photos for form corrections
+- **Customized Plans**: Get workout routines tailored to your physique
+
 ## Project Structure
 
 ```
 focusflow/
-├── main.py                    # Main orchestration script
+├── main.py                      # Main orchestration script
+├── test_vision.py               # Standalone vision analysis tester
+├── test_api.py                  # API connection tester
+├── fitness_tracker.py           # Streamlit web UI (optional)
 ├── agents/
 │   ├── __init__.py
-│   ├── insight.py            # Insight Agent (analyzes patterns)
-│   ├── coach.py              # Coach Agent (motivational feedback)
-│   └── planner.py            # Planner Agent (creates action plans)
+│   ├── vision_analyzer.py       # Vision Agent (body photo analysis)
+│   ├── insight.py               # Insight Agent (performance analysis)
+│   ├── coach.py                 # Coach Agent (motivation & progression)
+│   └── planner.py               # Planner Agent (workout & meal plans)
 ├── data/
-│   ├── sample_user.json      # Sample: poor wellness day
-│   ├── sample_user_good.json # Sample: good wellness day
-│   └── sample_user_moderate.json
-├── requirements.txt          # Python dependencies
-├── .env.example             # Environment template
+│   ├── sample_user.json         # Sample: needs work
+│   ├── sample_user_good.json    # Sample: strong lifter
+│   └── sample_user_moderate.json # Sample: intermediate
+├── requirements.txt             # Python dependencies
+├── .env.example                 # Environment template
 ├── .gitignore
 └── README.md
 ```
