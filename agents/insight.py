@@ -87,6 +87,20 @@ def analyze_user(data):
     Returns:
         str: Analysis insights
     """
+    # Import knowledge base for better analysis
+    try:
+        from knowledge_base import PROGRESSIVE_OVERLOAD, RECOVERY_NUTRITION
+        knowledge_context = f"""
+EXPERT KNOWLEDGE FOR ANALYSIS:
+{PROGRESSIVE_OVERLOAD}
+
+{RECOVERY_NUTRITION}
+
+Use these scientific principles to analyze the user's readiness for training.
+"""
+    except:
+        knowledge_context = ""
+
     system_prompt = """You are a fitness and strength training analyst specializing in
     progressive overload, nutrition, and workout optimization. Analyze user data objectively
     and identify patterns in their training, recovery, and nutrition."""
@@ -100,7 +114,9 @@ PHYSIQUE ANALYSIS FROM PHOTO:
 {data.get('photo_analysis')}
 """
 
-    prompt = f"""Analyze this user's fitness data and provide 3-5 key insights:
+    prompt = f"""{knowledge_context}
+
+Analyze this user's fitness data and provide 3-5 key insights:
 
 User Data:
 - Workout completed: {data.get('workout_done', False)}

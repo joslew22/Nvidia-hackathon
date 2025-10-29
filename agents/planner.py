@@ -85,6 +85,13 @@ def plan_next_day(insights, user_data=None):
     Returns:
         str: Actionable workout and meal plan for the next day
     """
+    # Import knowledge base
+    try:
+        from knowledge_base import get_relevant_knowledge, PROGRESSIVE_OVERLOAD, RECOVERY_NUTRITION
+        has_knowledge = True
+    except:
+        has_knowledge = False
+
     system_prompt = """You are an expert strength and conditioning coach who creates
     progressive workout plans and meal prep strategies. Focus on progressive overload,
     proper recovery, and nutrition timing to maximize gains."""
@@ -106,7 +113,21 @@ Current Stats:
 - Energy: {user_data.get('energy', 'unknown')}
 """
 
-    prompt = f"""Based on these insights, create tomorrow's workout and nutrition plan:
+    # Add expert knowledge to prompt
+    knowledge_context = ""
+    if has_knowledge:
+        knowledge_context = f"""
+EXPERT KNOWLEDGE BASE:
+{PROGRESSIVE_OVERLOAD}
+
+{RECOVERY_NUTRITION}
+
+Use this expert knowledge to create scientifically-backed recommendations.
+"""
+
+    prompt = f"""{knowledge_context}
+
+Based on these insights, create tomorrow's workout and nutrition plan:
 
 Insights:
 {insights}
