@@ -81,14 +81,50 @@ def initialize_fitness_profile():
     if 'notifications' not in st.session_state:
         st.session_state.notifications = []
 
+    # Notification settings (persistent)
+    if 'notifications_enabled' not in st.session_state:
+        st.session_state.notifications_enabled = True
+
+    if 'active_notifications' not in st.session_state:
+        st.session_state.active_notifications = []
+
 def main():
     initialize_fitness_profile()
 
     st.markdown('<h1 class="main-header">🏋️ FitFlow AI Gym Coach</h1>', unsafe_allow_html=True)
     st.markdown("**Personalized AI Fitness Coaching powered by NVIDIA NIM + Nemotron**")
 
-    # Navigation tabs
-    tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs(["👤 Profile", "📸 Photo Analysis", "📋 Workout Plan", "🔄 ReAct Loop", "📊 Progress", "🔔 Notifications"])
+    # Sidebar for notifications toggle
+    with st.sidebar:
+        st.subheader("⚙️ Settings")
+        notifications_enabled = st.toggle(
+            "🔔 Enable Notifications",
+            value=st.session_state.notifications_enabled,
+            help="Get smart alerts for workouts, meals, and PR attempts"
+        )
+        st.session_state.notifications_enabled = notifications_enabled
+
+        if notifications_enabled:
+            st.success("✅ Notifications Active")
+            # Auto-generate notifications in background
+            if st.button("🔄 Refresh Notifications"):
+                from notification_system import NotificationManager
+                user_data = {
+                    'body_weight': st.session_state.fitness_profile.get('weight', 70) * 2.2,
+                    'sleep_hours': 7.5,
+                    'soreness': 5,
+                    'energy': 'moderate',
+                    'max_lifts': {'bench_press': 185, 'squat': 225, 'deadlift': 275}
+                }
+                notif_manager = NotificationManager(user_data)
+                notif_manager.run_notification_check()
+                st.session_state.active_notifications = notif_manager.notifications
+                st.rerun()
+        else:
+            st.info("🔕 Notifications Disabled")
+
+    # Navigation tabs (removed ReAct Loop)
+    tab1, tab2, tab3, tab4, tab5 = st.tabs(["👤 Profile", "📸 Photo Analysis", "📋 Workout Plan", "📊 Progress", "🔔 Notifications"])
 
     with tab1:
         user_profile_page()
@@ -100,12 +136,9 @@ def main():
         workout_plan_page()
 
     with tab4:
-        react_loop_page()
-
-    with tab5:
         progress_tracking_page()
 
-    with tab6:
+    with tab5:
         notifications_page()
 
 def photo_analysis_page():
@@ -189,142 +222,6 @@ def photo_analysis_page():
                 st.write(st.session_state['vision_workout_plan'])
         else:
             st.info("👆 Upload a photo to get started with AI analysis")
-
-def react_loop_page():
-    """Multi-agent ReAct loop with feedback demonstration"""
-    st.header("🔄 Multi-Agent ReAct Loop")
-
-    st.markdown("""
-    Watch how our AI agents collaborate using the **ReAct pattern** (Reason → Act → Observe).
-    The agents will:
-    1. **Reason** - Analyze your fitness data
-    2. **Act** - Create a workout plan
-    3. **Observe** - Provide coaching feedback
-    4. **Re-evaluate** - Adjust based on simulated feedback
-    """)
-
-    # Input current stats
-    col1, col2 = st.columns(2)
-
-    with col1:
-        st.subheader("Current Stats")
-        sleep_hours = st.slider("Sleep last night (hours)", 4.0, 10.0, 7.0, 0.5)
-        soreness = st.slider("Soreness level (1-10)", 1, 10, 5)
-        energy = st.selectbox("Energy level", ["low", "moderate", "high"])
-
-    with col2:
-        st.subheader("Training Info")
-        bench_max = st.number_input("Bench Press Max (lbs)", 100, 500, 185, 5)
-        squat_max = st.number_input("Squat Max (lbs)", 100, 600, 225, 5)
-        deadlift_max = st.number_input("Deadlift Max (lbs)", 100, 700, 275, 5)
-
-    if st.button("🚀 Run ReAct Loop", type="primary", use_container_width=True):
-        # Create user data
-        user_data = {
-            "user_id": "streamlit_user",
-            "date": str(datetime.date.today()),
-            "workout_done": True,
-            "workout_type": "upper_body",
-            "max_lifts": {
-                "bench_press": bench_max,
-                "squat": squat_max,
-                "deadlift": deadlift_max
-            },
-            "recent_lifts": {},
-            "protein_grams": 140,
-            "calories": 2400,
-            "sleep_hours": sleep_hours,
-            "water_oz": 70,
-            "soreness": soreness,
-            "energy": energy,
-            "body_weight": 175
-        }
-
-        # Progress indicators
-        progress_text = st.empty()
-        progress_bar = st.progress(0)
-
-        # Iteration 1
-        progress_text.text("🧠 Iteration 1: Reasoning...")
-        progress_bar.progress(20)
-
-        with st.spinner("Insight Agent analyzing data..."):
-            insight = analyze_user(user_data)
-
-        with st.expander("🧠 Step 1: REASON - Insight Analysis", expanded=True):
-            st.markdown(f"**Insight Agent says:**\n\n{insight}")
-
-        progress_text.text("📋 Iteration 1: Planning...")
-        progress_bar.progress(40)
-
-        with st.spinner("Planner Agent creating workout plan..."):
-            plan = plan_next_day(insight, user_data)
-
-        with st.expander("📋 Step 2: ACT - Workout Plan", expanded=True):
-            st.markdown(f"**Planner Agent says:**\n\n{plan}")
-
-        progress_text.text("💪 Iteration 1: Coaching...")
-        progress_bar.progress(60)
-
-        with st.spinner("Coach Agent providing motivation..."):
-            coaching = motivate_user(insight, plan)
-
-        with st.expander("💪 Step 3: OBSERVE - Coaching Feedback", expanded=True):
-            st.markdown(f"**Coach Agent says:**\n\n{coaching}")
-
-        # Simulate user feedback
-        progress_text.text("💬 Simulating user feedback...")
-        progress_bar.progress(80)
-
-        feedback_scenarios = {
-            "too_hard": "This looks really intense. I'm not sure I can handle that volume with my current soreness.",
-            "just_right": "This looks challenging but doable!",
-            "too_easy": "I feel great and recovered. Can we add more volume?"
-        }
-
-        if soreness >= 7:
-            feedback = feedback_scenarios["too_hard"]
-            sentiment = "negative"
-        elif soreness <= 3:
-            feedback = feedback_scenarios["too_easy"]
-            sentiment = "positive"
-        else:
-            feedback = feedback_scenarios["just_right"]
-            sentiment = "neutral"
-
-        st.markdown(f"""
-        <div class="workout-card">
-            <h4>💬 Step 4: USER FEEDBACK (Simulated)</h4>
-            <p><strong>User says:</strong> "{feedback}"</p>
-            <p><strong>Sentiment:</strong> {sentiment.title()}</p>
-        </div>
-        """, unsafe_allow_html=True)
-
-        progress_text.text("✅ ReAct Loop Complete!")
-        progress_bar.progress(100)
-
-        # Store results
-        st.session_state['react_results'] = {
-            'insight': insight,
-            'plan': plan,
-            'coaching': coaching,
-            'feedback': feedback
-        }
-
-        st.success("🎉 Multi-agent collaboration complete! The agents have analyzed, planned, and coached based on your data.")
-
-        # Show summary
-        st.subheader("📊 ReAct Loop Summary")
-        col1, col2, col3 = st.columns(3)
-
-        with col1:
-            st.metric("Iterations", "1", help="Number of reasoning cycles")
-
-        with col2:
-            st.metric("Agents Used", "3", help="Insight, Planner, Coach")
-
-        with col3:
-            st.metric("Feedback Cycles", "1", help="User feedback iterations")
 
 def user_profile_page():
     """User profile and fitness goals setup"""
@@ -587,39 +484,21 @@ def notifications_page():
     """Real-time notifications and reminders using NotificationManager"""
     st.header("🔔 Smart Notifications")
 
+    # Check if notifications are enabled
+    if not st.session_state.notifications_enabled:
+        st.warning("🔕 Notifications are currently disabled. Enable them in the sidebar to receive alerts.")
+        return
+
     st.markdown("""
-    Get AI-powered notifications for workouts, meals, PR attempts, and recovery alerts.
+    AI-powered notifications for workouts, meals, PR attempts, and recovery alerts.
+    Notifications are updated automatically based on your profile and activity.
     """)
 
-    # Generate notifications button
-    if st.button("🔄 Generate Smart Notifications", type="primary", use_container_width=True):
-        from notification_system import NotificationManager
+    # Display active notifications from sidebar
+    if st.session_state.active_notifications:
+        st.subheader(f"📬 Active Notifications ({len(st.session_state.active_notifications)})")
 
-        # Create user data from profile
-        user_data = {
-            'body_weight': st.session_state.fitness_profile.get('weight', 70) * 2.2,  # kg to lbs
-            'sleep_hours': 7.5,  # Default values
-            'soreness': 5,
-            'energy': 'moderate',
-            'max_lifts': {
-                'bench_press': 185,
-                'squat': 225,
-                'deadlift': 275
-            }
-        }
-
-        # Generate notifications
-        notif_manager = NotificationManager(user_data)
-        notif_manager.run_notification_check()
-
-        # Store in session state
-        st.session_state['active_notifications'] = notif_manager.notifications
-
-    # Display active notifications
-    if 'active_notifications' in st.session_state and st.session_state['active_notifications']:
-        st.subheader("📬 Active Notifications")
-
-        for notif in st.session_state['active_notifications']:
+        for notif in st.session_state.active_notifications:
             priority_colors = {
                 'high': '#ff9a9e',
                 'medium': '#a8edea',
@@ -636,15 +515,17 @@ def notifications_page():
                 border-left: 5px solid #f44336;
                 margin: 1rem 0;
                 box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+                animation: slideIn 0.3s ease-out;
             ">
                 <h4 style="margin: 0; color: #333;">{notif['title']}</h4>
                 <p style="margin: 0.5rem 0; color: #555;">{notif['message']}</p>
                 <p style="margin: 0; font-size: 0.9rem; color: #666;"><strong>Priority:</strong> {notif['priority'].upper()}</p>
                 {f'<p style="margin: 0; font-size: 0.9rem; color: #666;"><strong>Action:</strong> {notif["action"].replace("_", " ").title()}</p>' if notif['action'] != 'none' else ''}
+                <p style="margin-top: 0.5rem; font-size: 0.8rem; color: #999;">{notif['timestamp'][:19]}</p>
             </div>
             """, unsafe_allow_html=True)
     else:
-        st.info("👆 Click 'Generate Smart Notifications' to see personalized alerts")
+        st.info("🔕 No active notifications. Click 'Refresh Notifications' in the sidebar to generate alerts.")
 
     # Manual notification settings
     st.subheader("⚙️ Notification Preferences")
