@@ -306,35 +306,37 @@ def generate_workout_plan():
     """Use AI agents to generate workout plan"""
     profile = st.session_state.fitness_profile
 
-    # Create user data for insights
+    # Create proper user data format for agents
     user_data = {
+        "user_id": "streamlit_user",
+        "date": str(datetime.date.today()),
+        "workout_done": False,
+        "workout_type": "planning",
+        "max_lifts": {
+            "bench_press": 135,  # Default starting values
+            "squat": 185,
+            "deadlift": 225,
+            "overhead_press": 95
+        },
+        "recent_lifts": {},
+        "protein_grams": 120,
+        "calories": 2200,
+        "sleep_hours": 7,
+        "water_oz": 70,
+        "soreness": 3,
+        "energy": "moderate",
+        "body_weight": profile['weight'] * 2.2,  # Convert kg to lbs
         "height": profile['height'],
-        "weight": profile['weight'],
         "age": profile['age'],
         "fitness_level": profile['fitness_level'],
         "goal": profile['goal'],
-        "gym_days": len(profile['gym_schedule']),
-        "experience": profile['fitness_level']
+        "gym_days": len(profile['gym_schedule'])
     }
 
     # Agent 1: Insight - Analyze fitness level and needs
     st.write("🧠 **Insight Agent**: Analyzing your fitness profile...")
-    insight_prompt = f"""Analyze this user's fitness profile for workout planning:
 
-Height: {profile['height']}cm
-Weight: {profile['weight']}kg
-Age: {profile['age']}
-Fitness Level: {profile['fitness_level']}
-Primary Goal: {profile['goal']}
-Available Days: {len(profile['gym_schedule'])} days/week
-
-Provide insights on:
-1. Optimal training frequency and intensity
-2. Muscle group priorities based on goal
-3. Recommended progression strategy
-4. Key areas to focus on"""
-
-    insights = analyze_user(user_data)  # This will use your existing insight agent
+    insights = analyze_user(user_data)
     st.write(insights)
 
     # Agent 2: Planner - Create detailed workout plan

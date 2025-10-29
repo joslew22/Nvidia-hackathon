@@ -25,10 +25,9 @@ def call_nemotron(prompt, system_prompt=""):
     if not api_key:
         return "⚠️  NIM_API_KEY not found. Please set it in your .env file."
 
-    # Get model configuration from environment
-    model = os.getenv("INSIGHT_MODEL", "nvidia/nemotron-4-340b-instruct")
-    fallback_model = os.getenv("FALLBACK_MODEL", "nvidia/llama-3.1-nemotron-70b-instruct")
-    endpoint = os.getenv("NIM_ENDPOINT", "https://integrate.api.nvidia.com/v1")
+    # Use the model from your API key
+    model = "nvidia/nemotron-nano-12b-v2-vl"
+    endpoint = "https://integrate.api.nvidia.com/v1"
 
     headers = {
         "Authorization": f"Bearer {api_key}",
@@ -61,20 +60,7 @@ def call_nemotron(prompt, system_prompt=""):
         return response_data.get("choices", [{}])[0].get("message", {}).get("content", "No response")
 
     except requests.exceptions.RequestException as e:
-        # Try fallback model if primary fails
-        try:
-            body["model"] = fallback_model
-            r = requests.post(
-                f"{endpoint}/chat/completions",
-                headers=headers,
-                json=body,
-                timeout=30
-            )
-            r.raise_for_status()
-            response_data = r.json()
-            return response_data.get("choices", [{}])[0].get("message", {}).get("content", "No response")
-        except:
-            return f"⚠️  API Error: {str(e)}"
+        return f"⚠️  API Error: {str(e)}"
 
 
 def analyze_user(data):

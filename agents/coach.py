@@ -24,10 +24,9 @@ def call_nemotron(prompt, system_prompt=""):
     if not api_key:
         return "⚠️  NIM_API_KEY not found. Please set it in your .env file."
 
-    # Get model configuration from environment
-    model = os.getenv("COACH_MODEL", "nvidia/nemotron-4-340b-instruct")
-    fallback_model = os.getenv("FALLBACK_MODEL", "nvidia/llama-3.1-nemotron-70b-instruct")
-    endpoint = os.getenv("NIM_ENDPOINT", "https://integrate.api.nvidia.com/v1")
+    # Use the model from your API key
+    model = "nvidia/nemotron-nano-12b-v2-vl"
+    endpoint = "https://integrate.api.nvidia.com/v1"
 
     headers = {
         "Authorization": f"Bearer {api_key}",
